@@ -1,61 +1,88 @@
+//////////////////////////////
+// CONFIGURAÇÃO SUPABASE
+//////////////////////////////
 const SUPABASE_URL = "https://rakktbwnybrsvqpbgaid.supabase.co";
 const SUPABASE_KEY = "sb_publishable_tLqbug91hIKbyGJHv4V8kA_HbjCmKiL";
-
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let fotos = [];
 let index = 0;
 
-// 🔄 Carrega fotos do Supabase
+//////////////////////////////
+// 🔄 CARREGAR FOTOS
+//////////////////////////////
 async function carregarFotos() {
   const { data, error } = await supabaseClient.storage
     .from('fotos-eventos')
-    .list('', { limit: 100 });
+    .list();
 
   if (error) {
     console.error("Erro ao carregar fotos:", error);
     return;
   }
 
-  fotos = data.map(file => {
-    const { data: publicUrl } = supabaseClient.storage
-      .from('fotos-eventos')
-      .getPublicUrl(file.name);
+  if (!data || data.length === 0) {
+    console.log("Nenhuma foto encontrada no telão.");
+    return;
+  }
 
-    return publicUrl.publicUrl;
-  });
+  fotos = data
+    .filter(file => file.name && !file.name.startsWith('.'))
+    .map(file => {
+      const { data } = supabaseClient.storage
+        .from('fotos-eventos')
+        .getPublicUrl(file.name);
+
+      return data.publicUrl;
+    });
+
+  console.log("Fotos do telão:", fotos);
 }
 
-// 🎬 Mostra foto com efeito
+//////////////////////////////
+// 🎬 MOSTRAR FOTO
+//////////////////////////////
 function mostrarFoto() {
   if (fotos.length === 0) return;
 
   const img = document.getElementById("fotoTelao");
 
-  // Remove efeito
+  if (!img) {
+    console.error("Elemento #fotoTelao não encontrado");
+    return;
+  }
+
   img.classList.remove("ativa");
 
   setTimeout(() => {
     img.src = fotos[index];
-
-    // Aplica efeito
     img.classList.add("ativa");
 
     index = (index + 1) % fotos.length;
   }, 500);
 }
 
-// 🚀 Inicialização
+//////////////////////////////
+// 🚀 INICIAR
+//////////////////////////////
 async function iniciar() {
   await carregarFotos();
 
-  // Atualiza lista de fotos (novas fotos entrando)
+  if (fotos.length > 0) {
+    mostrarFoto();
+  }
+
+  // Atualiza lista de fotos (novas fotos entram)
   setInterval(async () => {
     await carregarFotos();
   }, 10000);
 
-  // Troca de imagens com efeito
-  setInterval(mostrarFoto, 5000);
+  // Troca de imagens
+  setInterval(() => {
+    if (fotos.length > 0) {
+      mostrarFoto();
+    }
+  }, 5000);
 }
 
 iniciar();
