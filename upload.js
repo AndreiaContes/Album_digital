@@ -3,7 +3,7 @@ const evento = params.get("evento") || "default";
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  console.log("JS carregado");
+  console.log("JS carregado - Evento:", evento);
 
   const SUPABASE_URL = "https://rakktbwnybrsvqpbgaid.supabase.co";
   const SUPABASE_KEY = "sb_publishable_tLqbug91hIKbyGJHv4V8kA_HbjCmKiL";
@@ -30,7 +30,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const arquivo = input.files[0];
-    const nomeArquivo = Date.now() + "-" + arquivo.name;
+
+    // 🔥 NOVO: nome com EVENTO + timestamp
+    const nomeArquivo = `${evento}_${Date.now()}_${arquivo.name}`;
 
     mensagem.innerText = "Enviando...";
 
