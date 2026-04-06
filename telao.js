@@ -47,11 +47,6 @@ function mostrarFoto() {
 
   const img = document.getElementById("fotoTelao");
 
-  if (!img) {
-    console.error("Elemento #fotoTelao não encontrado");
-    return;
-  }
-
   img.classList.remove("ativa");
 
   setTimeout(() => {
@@ -59,8 +54,9 @@ function mostrarFoto() {
     img.classList.add("ativa");
 
     index = (index + 1) % fotos.length;
-  }, 500);
+  }, 300);
 }
+
 
 //////////////////////////////
 // 🚀 INICIAR
