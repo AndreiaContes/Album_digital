@@ -1,3 +1,6 @@
+//////////////////////////////
+// EVENTO (MULTI-EVENTO)
+//////////////////////////////
 const params = new URLSearchParams(window.location.search);
 const evento = params.get("evento") || "default";
 
@@ -12,7 +15,7 @@ let fotos = [];
 let index = 0;
 
 //////////////////////////////
-// 🔄 CARREGAR FOTOS
+// 🔄 CARREGAR FOTOS (COM FILTRO)
 //////////////////////////////
 async function carregarFotos() {
   const { data, error } = await supabaseClient.storage
@@ -30,7 +33,13 @@ async function carregarFotos() {
   }
 
   fotos = data
+    // 🔥 IGNORA arquivos inválidos
     .filter(file => file.name && !file.name.startsWith('.'))
+    
+    // 🔥 FILTRO POR EVENTO (ESSA É A CHAVE)
+    .filter(file => file.name.startsWith(evento))
+    
+    // 🔥 CONVERTE PARA URL
     .map(file => {
       const { data } = supabaseClient.storage
         .from('fotos-eventos')
@@ -39,7 +48,7 @@ async function carregarFotos() {
       return data.publicUrl;
     });
 
-  console.log("Fotos do telão:", fotos);
+  console.log("Fotos do telão (evento:", evento, "):", fotos);
 }
 
 //////////////////////////////
@@ -49,6 +58,7 @@ function mostrarFoto() {
   if (fotos.length === 0) return;
 
   const img = document.getElementById("fotoTelao");
+  if (!img) return;
 
   img.classList.remove("ativa");
 
@@ -60,7 +70,6 @@ function mostrarFoto() {
   }, 300);
 }
 
-
 //////////////////////////////
 // 🚀 INICIAR
 //////////////////////////////
@@ -71,12 +80,12 @@ async function iniciar() {
     mostrarFoto();
   }
 
-  // Atualiza lista de fotos (novas fotos entram)
+  // 🔄 Atualiza fotos novas
   setInterval(async () => {
     await carregarFotos();
   }, 10000);
 
-  // Troca de imagens
+  // 🎬 Troca automática
   setInterval(() => {
     if (fotos.length > 0) {
       mostrarFoto();
