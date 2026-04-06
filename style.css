@@ -283,3 +283,19 @@ input, select, textarea {
   max-height: 90%;
   object-fit: contain;
 }
+
+.btn-voltar {
+  display: block;
+  margin: 20px auto;
+  padding: 12px 20px;
+  font-size: 16px;
+  background-color: #000;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn-voltar:hover {
+  background-color: #333;
+}
