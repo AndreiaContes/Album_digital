@@ -1,3 +1,6 @@
+const params = new URLSearchParams(window.location.search);
+const evento = params.get("evento") || "default";
+
 //////////////////////////////
 // CONFIGURAÇÃO SUPABASE
 //////////////////////////////
