@@ -16,9 +16,11 @@ const closeZoom = document.getElementById('closeZoom');
 //////////////////////////////
 // FUNÇÕES DE ZOOM
 //////////////////////////////
-closeZoom.addEventListener('click', () => {
-  zoomOverlay.style.display = 'none';
-});
+if (closeZoom) {
+  closeZoom.addEventListener('click', () => {
+    zoomOverlay.style.display = 'none';
+  });
+}
 
 function openZoom(src) {
   zoomedImage.src = src;
@@ -28,7 +30,7 @@ function openZoom(src) {
 //////////////////////////////
 // FUNÇÃO ADICIONAR FOTO
 //////////////////////////////
-function addPhotoToAlbum(photoSrc) {
+function addPhotoToAlbum(photoSrc, isNew = false) {
   const wrapper = document.createElement('div');
   wrapper.classList.add('photo-wrapper');
 
@@ -38,13 +40,16 @@ function addPhotoToAlbum(photoSrc) {
   img.alt = "Foto enviada";
   img.addEventListener('click', () => openZoom(photoSrc));
 
-  // Botão Excluir
-  const deleteBtn = document.createElement('button');
-  deleteBtn.textContent = "Excluir";
-  deleteBtn.onclick = () => wrapper.remove();
-
   wrapper.appendChild(img);
-  wrapper.appendChild(deleteBtn);
+
+  // Botão Excluir (SÓ PARA FOTO NOVA)
+  if (isNew) {
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = "Excluir";
+    deleteBtn.onclick = () => wrapper.remove();
+
+    wrapper.appendChild(deleteBtn);
+  }
 
   albumGrid.appendChild(wrapper);
 }
@@ -76,7 +81,7 @@ async function carregarFotosAlbum() {
       .from('fotos-eventos')
       .getPublicUrl(file.name);
 
-    addPhotoToAlbum(publicUrl.publicUrl);
+    addPhotoToAlbum(publicUrl.publicUrl, false); // 🔥 NÃO pode excluir
   });
 
   console.log("Fotos carregadas no álbum!");
@@ -88,7 +93,7 @@ async function carregarFotosAlbum() {
 function handleUpload(file) {
   const reader = new FileReader();
   reader.onload = (e) => {
-    addPhotoToAlbum(e.target.result);
+    addPhotoToAlbum(e.target.result, true); // 🔥 pode excluir
   };
   reader.readAsDataURL(file);
 }
@@ -101,8 +106,8 @@ if (
   window.location.hostname === 'localhost' ||
   window.location.hostname === '127.0.0.1'
 ) {
-  addPhotoToAlbum('teste-fotos/foto1.png');
-  addPhotoToAlbum('teste-fotos/foto2.png');
+  addPhotoToAlbum('teste-fotos/foto1.png', true);
+  addPhotoToAlbum('teste-fotos/foto2.png', true);
 }
 
 //////////////////////////////
