@@ -2,6 +2,7 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Álbum do Evento</title>
 
   <!-- CSS correto -->
@@ -12,7 +13,14 @@
 
   <h1>📸 Álbum do Evento</h1>
 
-  <div class="galeria" id="galeria"></div>
+  <!-- Galeria de fotos -->
+  <div class="album-grid" id="albumGrid"></div>
+
+  <!-- Overlay para zoom -->
+  <div class="zoom-overlay" id="zoomOverlay">
+    <button id="closeZoom">Fechar</button>
+    <img id="zoomedImage" src="" alt="Foto ampliada">
+  </div>
 
   <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
