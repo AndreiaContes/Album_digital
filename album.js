@@ -1,3 +1,6 @@
+//////////////////////////////
+// EVENTO (MULTI-EVENTO)
+//////////////////////////////
 const params = new URLSearchParams(window.location.search);
 const evento = params.get("evento") || "default";
 
@@ -34,6 +37,8 @@ function openZoom(src) {
 // FUNÇÃO ADICIONAR FOTO
 //////////////////////////////
 function addPhotoToAlbum(photoSrc, isNew = false) {
+  if (!albumGrid) return;
+
   const wrapper = document.createElement('div');
   wrapper.classList.add('photo-wrapper');
 
@@ -45,7 +50,7 @@ function addPhotoToAlbum(photoSrc, isNew = false) {
 
   wrapper.appendChild(img);
 
-  // Botão Excluir (SÓ PARA FOTO NOVA)
+  // 🔥 Botão excluir APENAS para foto recém enviada
   if (isNew) {
     const deleteBtn = document.createElement('button');
     deleteBtn.textContent = "Excluir";
@@ -58,7 +63,7 @@ function addPhotoToAlbum(photoSrc, isNew = false) {
 }
 
 //////////////////////////////
-// 🔥 CARREGAR FOTOS DO STORAGE
+// 🔥 CARREGAR FOTOS DO STORAGE (COM FILTRO)
 //////////////////////////////
 async function carregarFotosAlbum() {
   const { data, error } = await supabaseClient.storage
@@ -75,19 +80,22 @@ async function carregarFotosAlbum() {
     return;
   }
 
-  albumGrid.innerHTML = ""; // limpa antes
+  albumGrid.innerHTML = "";
 
   data.forEach(file => {
     if (!file.name) return;
+
+    // 🔥 FILTRO POR EVENTO (ESSA É A CORREÇÃO PRINCIPAL)
+    if (!file.name.startsWith(evento)) return;
 
     const { data: publicUrl } = supabaseClient.storage
       .from('fotos-eventos')
       .getPublicUrl(file.name);
 
-    addPhotoToAlbum(publicUrl.publicUrl, false); // 🔥 NÃO pode excluir
+    addPhotoToAlbum(publicUrl.publicUrl, false);
   });
 
-  console.log("Fotos carregadas no álbum!");
+  console.log("Fotos carregadas do evento:", evento);
 }
 
 //////////////////////////////
@@ -96,7 +104,7 @@ async function carregarFotosAlbum() {
 function handleUpload(file) {
   const reader = new FileReader();
   reader.onload = (e) => {
-    addPhotoToAlbum(e.target.result, true); // 🔥 pode excluir
+    addPhotoToAlbum(e.target.result, true);
   };
   reader.readAsDataURL(file);
 }
