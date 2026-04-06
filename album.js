@@ -1,41 +1,111 @@
+//////////////////////////////
+// CONFIGURAÇÃO SUPABASE
+//////////////////////////////
 const SUPABASE_URL = "https://rakktbwnybrsvqpbgaid.supabase.co";
 const SUPABASE_KEY = "sb_publishable_tLqbug91hIKbyGJHv4V8kA_HbjCmKiL";
-
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-async function carregarFotos() {
+//////////////////////////////
+// ELEMENTOS DOM
+//////////////////////////////
+const albumGrid = document.getElementById('albumGrid'); 
+const zoomOverlay = document.getElementById('zoomOverlay');
+const zoomedImage = document.getElementById('zoomedImage');
+const closeZoom = document.getElementById('closeZoom');
+
+//////////////////////////////
+// FUNÇÕES DE ZOOM
+//////////////////////////////
+closeZoom.addEventListener('click', () => {
+  zoomOverlay.style.display = 'none';
+});
+
+function openZoom(src) {
+  zoomedImage.src = src;
+  zoomOverlay.style.display = 'flex';
+}
+
+//////////////////////////////
+// FUNÇÃO ADICIONAR FOTO
+//////////////////////////////
+function addPhotoToAlbum(photoSrc) {
+  const wrapper = document.createElement('div');
+  wrapper.classList.add('photo-wrapper');
+
+  // Imagem
+  const img = document.createElement('img');
+  img.src = photoSrc;
+  img.alt = "Foto enviada";
+  img.addEventListener('click', () => openZoom(photoSrc));
+
+  // Botão Excluir
+  const deleteBtn = document.createElement('button');
+  deleteBtn.textContent = "Excluir";
+  deleteBtn.onclick = () => wrapper.remove();
+
+  wrapper.appendChild(img);
+  wrapper.appendChild(deleteBtn);
+
+  albumGrid.appendChild(wrapper);
+}
+
+//////////////////////////////
+// 🔥 CARREGAR FOTOS DO STORAGE
+//////////////////////////////
+async function carregarFotosAlbum() {
   const { data, error } = await supabaseClient.storage
     .from('fotos-eventos')
-    .list('', { limit: 100 });
-
-  console.log("RESULTADO:", data);
-  console.log("ERRO:", error);
-
-  const galeria = document.getElementById('galeria');
-  galeria.innerHTML = "";
+    .list();
 
   if (error) {
-    alert("Erro ao buscar fotos!");
-    console.error(error);
+    console.error("Erro ao carregar fotos:", error);
     return;
   }
 
   if (!data || data.length === 0) {
-    alert("Nenhuma foto encontrada!");
+    console.log("Nenhuma foto encontrada no álbum.");
     return;
   }
 
+  albumGrid.innerHTML = ""; // limpa antes
+
   data.forEach(file => {
+    if (!file.name) return;
+
     const { data: publicUrl } = supabaseClient.storage
       .from('fotos-eventos')
       .getPublicUrl(file.name);
 
-    const img = document.createElement("img");
-    img.src = publicUrl.publicUrl;
-
-    galeria.appendChild(img);
+    addPhotoToAlbum(publicUrl.publicUrl);
   });
+
+  console.log("Fotos carregadas no álbum!");
 }
 
-carregarFotos();
-setInterval(carregarFotos, 5000);
+//////////////////////////////
+// FUNÇÃO DE UPLOAD LOCAL (preview)
+//////////////////////////////
+function handleUpload(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    addPhotoToAlbum(e.target.result);
+  };
+  reader.readAsDataURL(file);
+}
+
+//////////////////////////////
+// TESTE LOCAL (VSCode)
+//////////////////////////////
+if (
+  window.location.protocol === 'file:' ||
+  window.location.hostname === 'localhost' ||
+  window.location.hostname === '127.0.0.1'
+) {
+  addPhotoToAlbum('teste-fotos/foto1.png');
+  addPhotoToAlbum('teste-fotos/foto2.png');
+}
+
+//////////////////////////////
+// 🚀 INICIALIZAÇÃO
+//////////////////////////////
+carregarFotosAlbum();
