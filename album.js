@@ -1,3 +1,15 @@
+// Captura os parâmetros da URL
+const urlParams = new URLSearchParams(window.location.search);
+
+// Pega o valor do evento
+const evento = urlParams.get("evento");
+
+// Define um padrão caso não exista
+const eventoAtual = evento || "evento-teste";
+
+// Teste no console
+console.log("Evento atual:", eventoAtual);
+
 //////////////////////////////
 // EVENTO (MULTI-EVENTO)
 //////////////////////////////
